@@ -1,0 +1,13 @@
+services:
+  core:
+    environment:
+      - ENABLE_OPENAI_API=False  # 禁用 OpenAI 集成，卡死的原因就是这个
+      - OFFLINE_MODE=True        # 启用离线模式，不从 HuggingFace 拉取模型数据
+      - USE_OLLAMA_DOCKER=False  # 不使用集成 Ollama 容器
+      - TZ=Asia/Shanghai
+    image: ghcr.io/open-webui/open-webui:v0.5.19
+    ports:
+      - 4100:8080
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/backend/data
