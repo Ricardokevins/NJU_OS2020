@@ -1,63 +1,42 @@
 {
-    # 全局配置
     email admin@cppbear.site
     
-    # 全局日志配置
     log {
         output file /var/log/caddy/access.log {
             roll_size 100mb
             roll_keep 5
             roll_keep_for 720h
         }
+        format json  //
         level INFO
     }
 }
 
-# API服务
 ssapi.cppbear.site {
     reverse_proxy localhost:3000
     
-    # 启用压缩
     encode gzip
     
-    # 安全头
     header {
         Strict-Transport-Security max-age=31536000
         X-Content-Type-Options nosniff
-        X-Frame-Options SAMEORIGIN
+        X-Frame-Options SAME-ORIGIN
         X-XSS-Protection "1; mode=block"
     }
     
-    # CORS配置（如果API需要跨域访问）
     header {
         Access-Control-Allow-Origin *
         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
         Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
     }
     
-    # 单独的访问日志
     log {
         output file /var/log/caddy/ssapi.log
-        format single_field common_log
+        format json //
     }
 }
 
-# GPT服务
 ssgpt.cppbear.site {
-    reverse_proxy localhost:4100
-    
-    # 启用压缩
-    encode gzip
-    
-    # 安全头
-    header {
-        Strict-Transport-Security max-age=31536000
-        X-Content-Type-Options nosniff
-        X-Frame-Options SAMEORIGIN
-        X-XSS-Protection "1; mode=block"
-    }
-    
-    # 如果是WebSocket应用，添加WebSocket支持
     reverse_proxy localhost:4100 {
         header_up Host {host}
         header_up X-Real-IP {remote}
@@ -65,21 +44,8 @@ ssgpt.cppbear.site {
         header_up X-Forwarded-Proto {scheme}
     }
     
-    # 单独的访问日志
-    log {
-        output file /var/log/caddy/ssgpt.log
-        format single_field common_log
-    }
-}
-
-# Research服务
-ssresearch.cppbear.site {
-    reverse_proxy localhost:3333
-    
-    # 启用压缩
     encode gzip
     
-    # 安全头
     header {
         Strict-Transport-Security max-age=31536000
         X-Content-Type-Options nosniff
@@ -87,9 +53,26 @@ ssresearch.cppbear.site {
         X-XSS-Protection "1; mode=block"
     }
     
-    # 单独的访问日志
+    log {
+        output file /var/log/caddy/ssgpt.log
+        format json //
+    }
+}
+
+ssresearch.cppbear.site {
+    reverse_proxy localhost:3333
+    
+    encode gzip
+    
+    header {
+        Strict-Transport-Security max-age=31536000
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        X-XSS-Protection "1; mode=block"
+    }
+    
     log {
         output file /var/log/caddy/ssresearch.log
-        format single_field common_log
+        format json //
     }
 }
