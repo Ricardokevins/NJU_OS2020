@@ -1,15 +1,11 @@
 providers:
-  - provider: doi9
+  - provider: doi9 # 服务提供商名称, 如 openai、anthropic、gemini、openrouter，随便取名字，必填
     base_url: https://doi9.top/v1/chat/completions # 后端服务的API地址，必填
     api: sk-cYB5G7S6eLvs7uAUX0OUDxbs1GoNtRzpFYsG4gQnKH1TIadS # 提供商的API Key，必填
-  
-
   - provider: gemini
     base_url: https://generativelanguage.googleapis.com/v1beta # base_url 支持 v1beta/v1, 仅供 Gemini 模型使用，必填
     api: # 支持多个 API Key，多个 key 自动开启轮训负载均衡，至少一个 key，必填
-      - AIzaSyAN2k6IRdgw123
-      - AIzaSyAN2k6IRdgw456
-      - AIzaSyAN2k6IRdgw789
+      - AIzaSyDsYGTJlxks9uKbAa9afzLgkOXa-Wc7x9w
     model:
       - gemini-2.5-pro
       - gemini-2.5-flash: gemini-2.5-flash # 重命名后，原来的模型名字 gemini-2.5-flash 无法使用，如果要使用原来的名字，可以在 model 中添加原来的名字，只要加上下面一行就可以使用原来的名字了
@@ -43,22 +39,6 @@ api_keys:
     model: # 该 API Key 可以使用的模型，必填。默认开启渠道级轮询负载均衡，每次请求模型按照 model 配置的顺序依次请求。与 providers 里面原始的渠道顺序无关。因此你可以设置每个 API key 请求顺序不一样。
       - doi9/* # 可以使用的模型名称，仅可以使用名为 gemini 提供商提供的所有模型，其中 gemini 是 provider 名称，* 代表所有模型
     role: admin # 设置 API key 的别名，选填。请求日志会显示该 API key 的别名。如果 role 为 admin，则仅有此 API key 可以请求 v1/stats,/v1/generate-api-key 端点。如果所有 API key 都没有设置 role 为 admin，则默认第一个 API key 为 admin 拥有请求 v1/stats,/v1/generate-api-key 端点的权限。
-
-  - api: sk-pkhf60Yf0JGyJxgRmXqFQyTgWUd9GZnmi3KlvowmRWpWqrhy
-    model: # 该 API Key 可以使用的模型，必填。默认开启渠道级轮询负载均衡，每次请求模型按照 model 配置的顺序依次请求。与 providers 里面原始的渠道顺序无关。因此你可以设置每个 API key 请求顺序不一样。
-      - doi9/* # 可以使用的模型名称，仅可以使用名为 gemini 提供商提供的所有模型，其中 gemini 是 provider 名称，* 代表所有模型
-    preferences:
-      SCHEDULING_ALGORITHM: fixed_priority # 当 SCHEDULING_ALGORITHM 为 fixed_priority 时，使用固定优先级调度，永远执行第一个拥有请求的模型的渠道。默认开启，SCHEDULING_ALGORITHM 缺省值为 fixed_priority。SCHEDULING_ALGORITHM 可选值有：fixed_priority，round_robin，weighted_round_robin, lottery, random。
-      # 当 SCHEDULING_ALGORITHM 为 random 时，使用随机轮训负载均衡，随机请求拥有请求的模型的渠道。
-      # 当 SCHEDULING_ALGORITHM 为 round_robin 时，使用轮训负载均衡，按照顺序请求用户使用的模型的渠道。
-      AUTO_RETRY: true # 是否自动重试，自动重试下一个提供商，true 为自动重试，false 为不自动重试，默认为 true。也可以设置为数字，表示重试次数。
-      rate_limit: 15/min # 支持限流，每分钟最多请求次数，可以设置为整数，如 2/min，2 次每分钟、5/hour，5 次每小时、10/day，10 次每天，10/month，10 次每月，10/year，10 次每年。默认999999/min，选填。支持多个频率约束条件：15/min,10/day
-      # rate_limit: # 可以为每个模型设置不同的频率限制
-      #   gemini-2.5-flash: 10/min,500/day
-      #   gemini-2.5-pro: 5/min,25/day
-      #   default: 4/min # 如果模型没有设置频率限制，使用 default 的频率限制
-      ENABLE_MODERATION: true # 是否开启消息道德审查，true 为开启，false 为不开启，默认为 false，当开启后，会对用户的消息进行道德审查，如果发现不当的消息，会返回错误信息。
-
 
 preferences: # 全局配置
   model_timeout: # 模型超时时间，单位为秒，默认 100 秒，选填
