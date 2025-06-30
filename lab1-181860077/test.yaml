@@ -2,44 +2,11 @@ providers:
   - provider: doi9 # 服务提供商名称, 如 openai、anthropic、gemini、openrouter，随便取名字，必填
     base_url: https://doi9.top/v1/chat/completions # 后端服务的API地址，必填
     api: sk-cYB5G7S6eLvs7uAUX0OUDxbs1GoNtRzpFYsG4gQnKH1TIadS # 提供商的API Key，必填
-  - provider: gemini
-    base_url: https://generativelanguage.googleapis.com/v1beta # base_url 支持 v1beta/v1, 仅供 Gemini 模型使用，必填
-    api: # 支持多个 API Key，多个 key 自动开启轮训负载均衡，至少一个 key，必填
-      - AIzaSyDsYGTJlxks9uKbAa9afzLgkOXa-Wc7x9w
-    model:
-      - gemini-2.5-pro
-      - gemini-2.5-flash: gemini-2.5-flash # 重命名后，原来的模型名字 gemini-2.5-flash 无法使用，如果要使用原来的名字，可以在 model 中添加原来的名字，只要加上下面一行就可以使用原来的名字了
-      - gemini-2.5-flash
-      - gemini-2.5-pro: gemini-2.5-pro-search # 可以以 -search 后缀重命名模型，同时在 post_body_parameter_overrides 设置针对此模型的自定义请求体参数即可启用搜索。
-      - gemini-2.5-flash: gemini-2.5-flash-think-24576-search # 可以以 -search 后缀重命名模型，同时在 post_body_parameter_overrides 设置针对此模型的自定义请求体参数即可启用搜索，同时支持使用 `-think-数字` 自定义推理预算，可以同时开启也可以单独开启。
-      - gemini-2.5-flash: gemini-2.5-flash-think-0 # 支持以 -think-数字 自定义推理预算，当数字为 0 时，表示关闭推理。
-    tools: true
-    preferences:
-      api_key_rate_limit: 15/min # 每个 API Key 每分钟最多请求次数，选填。默认为 999999/min。支持多个频率约束条件：15/min,10/day
-      # api_key_rate_limit: # 可以为每个模型设置不同的频率限制
-      #   gemini-2.5-flash: 10/min,500/day
-      #   gemini-2.5-pro: 5/min,25/day
-      #   default: 4/min # 如果模型没有设置频率限制，使用 default 的频率限制
-      api_key_cooldown_period: 60 # 每个 API Key 遭遇 429 错误后的冷却时间，单位为秒，选填。默认为 0 秒, 当设置为 0 秒时，不启用冷却机制。当存在多个 API key 时才会生效。
-      api_key_schedule_algorithm: round_robin # 设置多个 API Key 的请求顺序，选填。默认为 round_robin，可选值有：round_robin，random，fixed_priority。当存在多个 API key 时才会生效。round_robin 是轮询负载均衡，random 是随机负载均衡，fixed_priority 是固定优先级调度，永远使用第一个可用的 API key。
-      model_timeout: # 模型超时时间，单位为秒，默认 100 秒，选填
-        gemini-2.5-pro: 500 # 模型 gemini-2.5-pro 的超时时间为 500 秒
-        gemini-2.5-flash: 500 # 模型 gemini-2.5-flash 的超时时间为 500 秒
-        default: 10 # 模型没有设置超时时间，使用默认的超时时间 10 秒，当请求的不在 model_timeout 里面的模型时，超时时间默认是 10 秒，不设置 default，uni-api 会使用全局配置的模型超时时间。
-      keepalive_interval: # 心跳间隔，单位为秒，默认 99999 秒，选填。适合当 uni-api 域名托管在 cloudflare 并使用推理模型时使用。优先级高于全局配置的 keepalive_interval。
-        gemini-2.5-pro: 50 # 模型 gemini-2.5-pro 的心跳间隔为 50 秒，此数值必须小于 model_timeout 设置的超时时间，否则忽略此设置。
-      post_body_parameter_overrides: # 支持自定义请求体参数
-        gemini-2.5-pro-search: # 给模型 gemini-2.5-pro-search 添加自定义请求体参数
-          tools:
-            - google_search: {} # 给模型 gemini-2.5-pro-search 添加 google_search 工具
-            - url_context: {} # 给模型 gemini-2.5-pro-search 添加 url_context 工具
-
 api_keys:
-  - api: sk-shesj # API Key，用户使用本服务需要 API key，必填
-    model: # 该 API Key 可以使用的模型，必填。默认开启渠道级轮询负载均衡，每次请求模型按照 model 配置的顺序依次请求。与 providers 里面原始的渠道顺序无关。因此你可以设置每个 API key 请求顺序不一样。
-      - doi9/* # 可以使用的模型名称，仅可以使用名为 gemini 提供商提供的所有模型，其中 gemini 是 provider 名称，* 代表所有模型
-    role: admin # 设置 API key 的别名，选填。请求日志会显示该 API key 的别名。如果 role 为 admin，则仅有此 API key 可以请求 v1/stats,/v1/generate-api-key 端点。如果所有 API key 都没有设置 role 为 admin，则默认第一个 API key 为 admin 拥有请求 v1/stats,/v1/generate-api-key 端点的权限。
-
+  - api: sk-shesj # API Key, required for users to use this service
+    model:
+      - doi9/* # Usable model name, can only use all models provided by providers named gemini, where gemini is the provider name, * represents all models
+    role: admin
 preferences: # 全局配置
   model_timeout: # 模型超时时间，单位为秒，默认 100 秒，选填
     gpt-4o: 10 # 模型 gpt-4o 的超时时间为 10 秒,gpt-4o 是模型名称，当请求 gpt-4o-2024-08-06 等模型时，超时时间也是 10 秒
