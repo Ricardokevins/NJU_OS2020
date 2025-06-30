@@ -1,13 +1,27 @@
 services:
-  core:
-    environment:
-      - ENABLE_OPENAI_API=False  # 禁用 OpenAI 集成，卡死的原因就是这个
-      - OFFLINE_MODE=True        # 启用离线模式，不从 HuggingFace 拉取模型数据
-      - USE_OLLAMA_DOCKER=False  # 不使用集成 Ollama 容器
-      - TZ=Asia/Shanghai
-    image: ghcr.io/open-webui/open-webui:v0.5.19
-    ports:
-      - 4100:8080
+  # 这是 uni-api 服务的示例，如果已有则无需重复添加
+  uniapi:
+    image: yym68686/uni-api:latest
     restart: unless-stopped
     volumes:
-      - ./data:/app/backend/data
+      - /home/ubuntu/uniapi/api.yaml:/home/api.yaml
+      - /home/ubuntu/uniapi/data:/home/data
+
+  # 本应用的前端服务
+  uniapi-frontend:
+    image: ghcr.io/melosbot/uni-api-status:latest
+    restart: unless-stopped
+    ports:
+      # 将宿主机的 3000 端口映射到容器。如果 3000 端口被占用，请修改左侧值，如 "8080:3000"
+      - "9090:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # 以下为容器内的路径，与 volumes 挂载点对应
+      - API_YAML_PATH=/app/config/api.yaml
+      - STATS_DB_PATH=/app/data/stats.db
+    volumes:
+      # 将宿主机的 api.yaml 挂载到容器内，需要【读写】权限
+      - /home/ubuntu/uniapi/api.yaml:/app/config/api.yaml
+      # 将宿主机包含 stats.db 的目录挂载到容器内，建议只读【:ro】
+      - /home/ubuntu/uniapi/data:/app/data:ro
