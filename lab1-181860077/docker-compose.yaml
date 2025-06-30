@@ -1,5 +1,6 @@
+version: "3.8"
+
 services:
-  # 这是 uni-api 服务的示例，如果已有则无需重复添加
   uniapi:
     image: yym68686/uni-api:latest
     restart: unless-stopped
@@ -7,21 +8,16 @@ services:
       - /home/ubuntu/uniapi/api.yaml:/home/api.yaml
       - /home/ubuntu/uniapi/data:/home/data
 
-  # 本应用的前端服务
   uniapi-frontend:
     image: ghcr.io/melosbot/uni-api-status:latest
     restart: unless-stopped
     ports:
-      # 将宿主机的 3000 端口映射到容器。如果 3000 端口被占用，请修改左侧值，如 "8080:3000"
       - "9090:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # 以下为容器内的路径，与 volumes 挂载点对应
       - API_YAML_PATH=/app/config/api.yaml
       - STATS_DB_PATH=/app/data/stats.db
     volumes:
-      # 将宿主机的 api.yaml 挂载到容器内，需要【读写】权限
       - /home/ubuntu/uniapi/api.yaml:/app/config/api.yaml
-      # 将宿主机包含 stats.db 的目录挂载到容器内，建议只读【:ro】
       - /home/ubuntu/uniapi/data:/app/data:ro
